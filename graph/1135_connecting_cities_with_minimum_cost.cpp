@@ -49,7 +49,7 @@ class Comp {
 
  public:
   bool operator()(const t& lhs, const t& rhs) const {
-    return std::get<2>(lhs) < std::get<2>(rhs);
+    return std::get<2>(lhs) > std::get<2>(rhs);
   }
 };
 
