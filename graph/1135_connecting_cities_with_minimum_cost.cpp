@@ -1,7 +1,10 @@
 #include "algorithm"
 #include "numeric"
-#include "vector"
+#include "queue"
+#include "tuple"
+#include "utility"
 
+// kruskal
 int find(std::vector<int>& ancestor, int i) {
   if (i != ancestor[i]) ancestor[i] = find(ancestor, ancestor[i]);
   return ancestor[i];
@@ -37,4 +40,63 @@ int minimumCost(int N, std::vector<std::vector<int>>& connections) {
   }
 
   return merge_edge_count == N - 1 ? cost : -1;
+}
+
+// prim
+class Comp {
+ private:
+  typedef std::tuple<int, int, int> t;
+
+ public:
+  bool operator()(const t& lhs, const t& rhs) const {
+    return std::get<2>(lhs) < std::get<2>(rhs);
+  }
+};
+
+inline void get_edges(
+    const std::vector<std::vector<std::pair<int, int>>>& graph,
+    const std::vector<bool>& in_mst,
+    std::priority_queue<std::tuple<int, int, int>,
+                        std::vector<std::tuple<int, int, int>>, Comp>& pq,
+    int node) {
+  for (const auto& it : graph[node]) {
+    if (!in_mst[it.first]) {
+      pq.push(std::make_tuple(node, it.first, it.second));
+    }
+  }
+}
+
+int minimumCost_prim(int N, std::vector<std::vector<int>>& connections) {
+  int num_of_edges = connections.size();
+  if (num_of_edges < N - 1) return -1;
+
+  std::vector<std::vector<std::pair<int, int>>> graph(
+      N + 1, std::vector<std::pair<int, int>>());
+  for (const auto& edge : connections) {
+    graph[edge[0]].push_back(std::make_pair(edge[1], edge[2]));
+    graph[edge[1]].push_back(std::make_pair(edge[0], edge[2]));
+  }
+
+  std::priority_queue<std::tuple<int, int, int>,
+                      std::vector<std::tuple<int, int, int>>, Comp>
+      pq;
+  std::vector<bool> in_mst(N + 1, false);
+  in_mst[1] = true;
+  get_edges(graph, in_mst, pq, 1);
+
+  std::tuple<int, int, int> edge;
+  int to, weight = 0, num_of_nodes = 1;
+  while (!pq.empty()) {
+    edge = pq.top();
+    pq.pop();
+    to = std::get<1>(edge);
+    if (!in_mst[to]) {
+      in_mst[to] = true;
+      ++num_of_nodes;
+      weight += std::get<2>(edge);
+      get_edges(graph, in_mst, pq, to);
+    }
+  }
+
+  return num_of_nodes == N ? weight : -1;
 }
