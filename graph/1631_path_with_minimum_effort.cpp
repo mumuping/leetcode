@@ -4,6 +4,15 @@
 #include "vector"
 
 // 最小堆版本的 dijsktra 算法
+class Comp {
+ private:
+  using type_of_priority_queue = std::pair<std::pair<int, int>, int>;
+ public:
+  bool operator()(const type_of_priority_queue &lhs, const type_of_priority_queue &rhs) {
+    return lhs.second > rhs.second;
+  }
+};
+
 int minimumEffortPath(std::vector<std::vector<int>> &heights) {
   int row = heights.size();
   if (row == 0) return 0;
@@ -22,7 +31,7 @@ int minimumEffortPath(std::vector<std::vector<int>> &heights) {
   using type_of_priority_queue = std::pair<std::pair<int, int>, int>;
   std::vector<std::vector<int>> efforts(row, std::vector<int>(col, INT_MAX));
   std::priority_queue<type_of_priority_queue,
-  std::vector<type_of_priority_queue>, std::greater<>>
+                      std::vector<type_of_priority_queue>, Comp>
       q;
   const int directions[5] = {-1, 0, 1, 0, -1};
   efforts[0][0] = 0;
