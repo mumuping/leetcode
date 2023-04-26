@@ -9,12 +9,10 @@
  */
 class SegmentTreeMax {
  public:
-  explicit SegmentTreeMax(const std::vector<int> &array) : raw_array_(1),
-														   segment_tree_(static_cast<int>(array.size() << 2)),
-														   lazy_tag_(static_cast<int>(array.size() << 2)) {
-	raw_array_.reserve(array.size() + 1);
-	raw_array_.insert(raw_array_.end(), array.begin(), array.end());
-	Build(1, array.size(), 1);
+  explicit SegmentTreeMax(const std::vector<int> &array) :
+	  segment_tree_(static_cast<int>(array.size() << 2)),
+	  lazy_tag_(static_cast<int>(array.size() << 2)) {
+	Build(1, array.size(), 1, array);
   }
 
   /**
@@ -22,17 +20,18 @@ class SegmentTreeMax {
    * @param l the left border of the interval
    * @param r the right border of the interval
    * @param curr_node the node that presents the interval
+   * @param raw_array the raw array
    */
-  auto Build(int l, int r, int curr_node) -> void {
+  auto Build(int l, int r, int curr_node, const std::vector<int>& raw_array) -> void {
 	/** Reach the leaf node */
 	if (l==r) {
-	  segment_tree_[curr_node] = raw_array_[l];
+	  segment_tree_[curr_node] = raw_array[l];
 	  return;
 	}
 	int mid = l + ((r - l) >> 1);
 	/** Build the left child tree and right child tree separately */
-	Build(l, mid, curr_node << 1);
-	Build(mid + 1, r, curr_node << 1 | 1);
+	Build(l, mid, curr_node << 1, raw_array);
+	Build(mid + 1, r, curr_node << 1 | 1, raw_array);
 	/** Update the current node */
 	Pushup(curr_node);
   }
@@ -48,7 +47,6 @@ class SegmentTreeMax {
   auto Update(int index_to_be_updated, int delta, int l, int r, int curr_node) -> void {
 	/** Reach the leaf node */
 	if (l==r) {
-	  raw_array_[index_to_be_updated] += delta;
 	  segment_tree_[curr_node] += delta;
 	  return;
 	}
@@ -141,8 +139,6 @@ class SegmentTreeMax {
   }
 
  private:
-  /** The raw array that stores values. It starts at index 1 */
-  std::vector<int> raw_array_;
   /** The segment tree. It starts at index 1 */
   std::vector<int> segment_tree_;
   /** The lazy update array */
